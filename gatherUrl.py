@@ -1,6 +1,8 @@
 import collectChapters
 import saveEpub
+import prettifyHtml
 import re
+from datetime import datetime
 
 def selectWebsite():
     print("\n1 - Eastern novels")
@@ -24,17 +26,34 @@ def manualLinkInput():
         i = i + 1
     return chapterUrlArr
 
+def findEasternNovelName():
+    print()
+
 def findEasternNovel():
-    novelName = input("Input the novel you want to find format('this novel name'):")
-    novelName = novelName.strip()
-    novelName = re.sub(r"[)':!?(,‘'’\"“”]", "", novelName)
-    novelName = novelName.replace(" ", "-")
-    novelName = novelName.lower()
+    try:
+        with open("novelList.txt", 'r') as file:
+            option = input(f"Last update: {file.readline().strip()}, do you wish to update the file list? (y,n): ")
+            if option == 'y':
+                avaliableNovelList = collectChapters.updateAvaliableEasternNovelList()    
+    except Exception as exc:
+        print("The file doesnt exist. Making it now!")
+        avaliableNovelList = collectChapters.updateAvaliableEasternNovelList()
     
+    novelName = input("Input the novel you want to find, format:'this novel name':")
+    novelName = re.sub(r"[)':!?(,‘'’\"“”]", "", novelName.strip()).lower()
+    if avaliableNovelList:
+        possibleNovelList = [name for name in avaliableNovelList if novelName in name]
+        for index, possibleNovel in enumerate(possibleNovelList):
+            print(f"{possibleNovel} - {index + 1}")
+        choice = int(input("Select the novel you want by typing in the number: "))
+        if choice == int(choice) and choice <= len(possibleNovelList):
+            novelName = possibleNovelList[choice - 1]
+    else:
+        print("Couldn't access the novel list")
     autoCheckResult = collectChapters.autoSearchNovel(novelName)
     if autoCheckResult == False:
         print("Manual link only works from NovelFire and NovelBin")
-        decision = input("\nDo you want to input the link to the first chapter manually? y/n")
+        decision = input("\nDo you want to input the link to the first chapter manually? y/n: ")
         if not decision == "y":
             print("Goodbye!")
             return False 

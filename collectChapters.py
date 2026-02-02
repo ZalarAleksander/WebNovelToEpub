@@ -13,6 +13,23 @@ scraper = cloudscraper.create_scraper(
     delay=5,               
     debug=False
 )
+def updateAvaliableEasternNovelList():
+    try:
+        response = scraper.get("https://freewebnovel.com/sitemap.xml", timeout=30)
+        if response.status_code == 200 and len(response.text) > 2000:
+            html = response.text
+            novelList = prettifyHtml.saveEasternNovelNames(html)
+            if novelList:
+                print("Successfully updated!")
+                return novelList
+            else:
+                return False
+            
+    except Exception as exc:
+        print(f"error - {exc}, check connection")
+        return False
+
+
 def scrapeChaptersNovelBin(url):  # add #tab-chapters-title
     url = url + "#tab-chapters-title"
     response = scraper.get(url, timeout=30)
@@ -22,6 +39,7 @@ def scrapeChaptersNovelBin(url):  # add #tab-chapters-title
     return chapterUrlArr
 
 def autoSearchNovel(name):
+    name = name.replace(" ", "-")
     baseUrlArr = [
         "https://freewebnovel.com/novel/",
         "https://novelfire.net/book/",
@@ -29,7 +47,6 @@ def autoSearchNovel(name):
     ]
     for index, base in enumerate(baseUrlArr):
         url = base + name
-        print(url)
         try:
             response = scraper.get(url, timeout=30) 
         except Exception as exc:

@@ -1,5 +1,41 @@
 import re
 from bs4 import BeautifulSoup
+from datetime import datetime
+
+# https://freewebnovel.com/novel/saving-system-calm-down-my-fleeing-host
+
+def getEasternNovelNames():
+    try:
+        with open("novel_list.txt", 'r') as file:
+            firstLine = file.readline()
+            if firstLine:
+                novelNameArr = [line.strip() for line in file]
+                return novelNameArr
+        return False        
+    except Exception as exc:
+        print(f"There was an error in getEasternNovelNames! - {exc}")
+        return False
+
+def saveEasternNovelNames(html):
+    try:
+        with open("novelList.txt", 'w', encoding="utf-8") as file:
+            dateNow = datetime.now()
+            cuteDate = dateNow.strftime("%d %B %Y")
+            file.write(f"{cuteDate}\n")
+            soup = BeautifulSoup(html, 'xml')
+            novelList = []
+            for url in soup.find_all('loc'):
+                tempUrl = url.text
+                match = re.search(r"novel/(.+)", tempUrl)
+                if match:
+                    finalName = match.group(1)
+                    finalName = re.sub('-', " ", finalName)
+                    file.write(f"{finalName}\n")
+                    novelList.append(finalName)
+            return novelList
+    except Exception as exc:
+        print(f"There was an error in saveEasternNovelNames! - {exc}")
+    
 
 def extractChapterList(html):
     soup = BeautifulSoup(html, 'html.parser')
