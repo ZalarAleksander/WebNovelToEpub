@@ -1,8 +1,5 @@
-
 from ebooklib import epub
 import uuid
-
-globalContentArr = []
 
 def saveToEpub(dataDict):
     sortedDict = [dataDict[i] for i in sorted(dataDict)]
@@ -14,7 +11,7 @@ def saveToEpub(dataDict):
     book.set_language("en")
     book.add_author("RalazScrapes")
 
-    chapters = []
+    chapterList = []
     for i, chapterData in enumerate(sortedDict):
         chapter = epub.EpubHtml(
             title = chapterData['title'],
@@ -22,14 +19,17 @@ def saveToEpub(dataDict):
             lang='en'
         )
         htmlContent = f"<h1>{chapterData['title']}</h1>"
-        htmlContent += chapterData['content'].replace('\n\n', '<p></p>')
+        for line in chapterData['content'].split('\n'):
+            line = line.strip()
+            if line:
+                htmlContent += f"<p>{line}</p>"
         chapter.content = htmlContent
         book.add_item(chapter)
-        chapters.append(chapter)
-    book.toc = tuple(chapters)
+        chapterList.append(chapter)
+    book.toc = tuple(chapterList)
     book.add_item(epub.EpubNcx())
     book.add_item(epub.EpubNav())
-    book.spine = ['nav'] + chapters
+    book.spine = ['nav'] + chapterList
     fileName = f"{title.replace(' ', '_')}.epub"
     epub.write_epub(fileName, book, {})
     print(f"Finished writing {fileName}")
