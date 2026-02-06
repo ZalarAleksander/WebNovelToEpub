@@ -2,6 +2,7 @@ import cloudscraper
 import random
 import time
 import prettifyHtml
+import re
 
 scraper = cloudscraper.create_scraper(
     browser={
@@ -30,12 +31,11 @@ def updateAvaliableEasternNovelList():
         return False
 
 
-def scrapeChaptersNovelBin(url):  # add #tab-chapters-title
+def scrapeChapterListNovelBin(url):  # add #tab-chapters-title
     url = url + "#tab-chapters-title"
     response = scraper.get(url, timeout=30)
     html = response.text
     chapterUrlArr = prettifyHtml.extractChapterList(html)
-    
     return chapterUrlArr
 
 def autoSearchNovel(name):
@@ -56,7 +56,7 @@ def autoSearchNovel(name):
             if response.status_code == 404:
                 print("Novel not found on NovelBin")
             else:
-                chapterUrlArr = scrapeChaptersNovelBin(url)
+                chapterUrlArr = scrapeChapterListNovelBin(url)
                 return chapterUrlArr
         else:
             if not response.status_code == 404:
@@ -114,11 +114,15 @@ def scrapeChapters(chapterUrlArr):
                 time.sleep(15)
                 retries += 1
         if success:
+            chapterNum = re.findall(r'(\d+)', chapterUrl)
+            realChapterNum = chapterNum[-1] # finds the last num in the url
             cleanHTML = prettifyHtml.cleanText(textHTML)
-            bookData[index] = {
-                'title': f"Chapter {index + 1}",
+
+            bookData[int(realChapterNum)] = {
+                'title': f"Chapter-{realChapterNum}",
                 'content': cleanHTML
             }
+
             del textHTML
             print(f"found chapter waiting for ~4s")
             time.sleep(random.uniform(2, 6))
