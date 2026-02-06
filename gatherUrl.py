@@ -79,6 +79,13 @@ def selectNovelType():
             return False
             findWesternNovel()
     
+    
+    checkSelection = False
+    title = input("Input the novel name: ")
+    while checkSelection == False:
+        selection = selectSaveType()
+        if selection in [1,2]:
+            checkSelection = True
     data, fail = collectChapters.scrapeChapters(chapterUrlArr)
     if fail:
         data2, fail2 = collectChapters.scrapeChapters(fail)
@@ -88,12 +95,7 @@ def selectNovelType():
             data.update(data3)
             for fails in fail3:
                 print(f"Failed: {fails}")
-    checkSelection = False
-    while checkSelection == False:
-        selection = selectSaveType()
-        if selection in [1,2]:
-            checkSelection = True
     if selection == 1:
-        saveFiles.saveToHtml(data)
+        saveFiles.saveToHtml(data, title)
     else:
-        saveFiles.saveToEpub(data)
+        saveFiles.saveToEpub(data, title)

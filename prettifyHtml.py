@@ -6,7 +6,7 @@ from datetime import datetime
 
 def getEasternNovelNames():
     try:
-        with open("novel_list.txt", 'r') as file:
+        with open("novelList.txt", 'r') as file:
             firstLine = file.readline()
             if firstLine:
                 novelNameArr = [line.strip() for line in file]
