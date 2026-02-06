@@ -1,5 +1,5 @@
 import collectChapters
-import saveEpub
+import saveFiles
 import prettifyHtml
 import re
 from datetime import datetime
@@ -7,12 +7,8 @@ from datetime import datetime
 def selectWebsite():
     print("\n1 - Eastern novels")
     print("2 - Western novels -- DOESNT WORK YET")
-    
     selection = int(input("\nWhich kind are you searching for: "))
     return selection
-
-def projectGutenbergSearch():
-    print("jes")
 
 def manualLinkInput():
     print("For now only search on novelfire.net and freewebnovel.com")
@@ -26,20 +22,19 @@ def manualLinkInput():
         i = i + 1
     return chapterUrlArr
 
-def findEasternNovelName():
-    print()
-
 def findEasternNovel():
     try:
         with open("novelList.txt", 'r') as file:
             option = input(f"Last update: {file.readline().strip()}, do you wish to update the file list? (y,n): ")
             if option == 'y':
                 avaliableNovelList = collectChapters.updateAvaliableEasternNovelList()    
+            else:
+                avaliableNovelList = prettifyHtml.getEasternNovelNames()
     except Exception as exc:
         print("The file doesnt exist. Making it now!")
         avaliableNovelList = collectChapters.updateAvaliableEasternNovelList()
     
-    novelName = input("Input the novel you want to find, format:'this novel name':")
+    novelName = input("Input the novel you want to find, format:'this novel name': ")
     novelName = re.sub(r"[)':!?(,‘'’\"“”]", "", novelName.strip()).lower()
     if avaliableNovelList:
         possibleNovelList = [name for name in avaliableNovelList if novelName in name]
@@ -62,9 +57,12 @@ def findEasternNovel():
             return chapterUrlArr
     else:
         return autoCheckResult
-    
-def findWesternNovel():
-    print("ok")    
+
+def selectSaveType():
+    print("\n1 - Save to HTML - WebApp")
+    print("2 - Save to Epub - Local")
+    selection = int(input("\nWhat kind do you want to save: "))
+    return selection
 
 def selectNovelType(): 
     checkSelection = False
@@ -90,4 +88,12 @@ def selectNovelType():
             data.update(data3)
             for fails in fail3:
                 print(f"Failed: {fails}")
-    saveEpub.saveToEpub(data)
+    checkSelection = False
+    while checkSelection == False:
+        selection = selectSaveType()
+        if selection in [1,2]:
+            checkSelection = True
+    if selection == 1:
+        saveFiles.saveToHtml(data)
+    else:
+        saveFiles.saveToEpub(data)
